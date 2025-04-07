@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
     public float jumpForce;
 
     public Transform groundPoint;
+    // PlayerÇ™à⁄ìÆÇµÇƒÇ¢ÇÈÇ©Ç«Ç§Ç©
+    private bool bMove;
     // ínñ Ç…ïtÇ¢ÇƒÇ¢ÇÈÇ©Ç«Ç§Ç©
     private bool bOnGround;
     public LayerMask whatIsGround;
@@ -43,7 +45,6 @@ public class PlayerController : MonoBehaviour
     {
         if(shotWaitingTime >= shotWaitTime)
         {
-            shotWaitingTime = shotWaitTime;
             SetbWaitingShot(false);
         }
         else
@@ -74,6 +75,7 @@ public class PlayerController : MonoBehaviour
     // èâä˙âªèàóù
     private void Initialize()
     {
+        SetbMove(false);
         // ShotèÛë‘Ç≈ÇÕÇ»Ç¢
         SetbShot(false);
         SetbWaitingShot(false);
@@ -90,10 +92,16 @@ public class PlayerController : MonoBehaviour
         if (theRB.velocity.x < 0)
         {
             transform.localScale = new Vector3(-1f, 1f, 1f);
+            SetbMove(true);
         }
         else if (theRB.velocity.x > 0)
         {
             transform.localScale = Vector3.one;
+            SetbMove(true);
+        }
+        else
+        {
+            SetbMove(false);
         }
     }
 
@@ -120,6 +128,8 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("bOnGround", bOnGround);
         // PlayerÇÃë¨ìxÇäiî[
         anim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        // PlayerÇ™à⁄ìÆÇµÇƒÇ¢ÇÈÇ©Ç«Ç§Ç©
+        anim.SetBool("bMove", bMove);
         // ShotAnim
         anim.SetBool("bShot", bShot);
         // ShotWaiting
@@ -146,9 +156,12 @@ public class PlayerController : MonoBehaviour
         SetbWaitingShot(true);
     }
 
-    // isShotSet
+    // bMove
+    public void SetbMove(bool A_bMove) { bMove = A_bMove; }
+
+    // bShotSet
     public void SetbShot(bool Shot) { bShot = Shot; }
 
-    // isWaitingShotSet
+    // bWaitingShotSet
     public void SetbWaitingShot(bool WaitingShot) { bWaitingShot = WaitingShot; }
 }
