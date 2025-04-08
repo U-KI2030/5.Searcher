@@ -44,4 +44,9 @@ public class ShotController : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    public void SetMoveDir(float x,float y)
+    {
+        moveDir = new Vector2(x, y);
+    }
 }

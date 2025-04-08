@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody2D theRB;
 
 /* ----------------------------------------------------*/
-    // 移動・ジャンプ関係変数
+    // 移動・ジャンプ、操作関係変数
     public float moveSpeed;
     public float jumpForce;
 
@@ -18,8 +18,21 @@ public class PlayerController : MonoBehaviour
     private bool bOnGround;
     public LayerMask whatIsGround;
 
-/* ----------------------------------------------------*/
+    // 上キーを入力されているかどうか
+    private bool bUp;
+
+    // Playerの向いている向きを格納
+    // -1 : 左
+    // 0 : 上
+    // 1 : 右
+    private int dirPlayer;
+    // 一時的に向きを
+
+    /* ----------------------------------------------------*/
     // Shot関係変数
+    // ShotPrefab
+    public GameObject Pre_Shot;
+
     // Shotを行ったかどうか
     private bool bShot;
     // Shot待ち状態であるかどうか
@@ -28,6 +41,11 @@ public class PlayerController : MonoBehaviour
     public float shotWaitTime;
     // shot状態を保持している時間
     private float shotWaitingTime;
+
+    // 弾が出る位置(Normal)
+    public Transform ShotPoint;
+    // 弾が出る位置(Up)
+    public Transform ShotPoint_Up;
 
 /* ----------------------------------------------------*/
     // アニメ関係変数
@@ -50,6 +68,27 @@ public class PlayerController : MonoBehaviour
         else
         {
             shotWaitingTime += Time.deltaTime;
+        }
+
+        // 上キーを入力しているかどうか確認
+        if (Input.GetAxisRaw("Vertical") > 0)
+        {
+            SetbUp(true);
+            dirPlayer = 0;
+        }
+        else
+        {
+            SetbUp(false);
+
+            // 左を向いている
+            if(transform.localScale.x < 0f)
+            {
+                dirPlayer = -1;
+            }
+            if(transform.localScale.x > 0f)
+            {
+                dirPlayer = 1;
+            }
         }
 
         // 移動
@@ -75,7 +114,13 @@ public class PlayerController : MonoBehaviour
     // 初期化処理
     private void Initialize()
     {
+        // 上を向いていない
+        SetbUp(false);
+        // 動いてない
         SetbMove(false);
+        // Playerの向いている向きは右(1)
+        dirPlayer = 1;
+
         // Shot状態ではない
         SetbShot(false);
         SetbWaitingShot(false);
@@ -92,12 +137,16 @@ public class PlayerController : MonoBehaviour
         if (theRB.velocity.x < 0)
         {
             transform.localScale = new Vector3(-1f, 1f, 1f);
+
             SetbMove(true);
+            SetbShot(false);
+            SetbWaitingShot(false);
         }
         else if (theRB.velocity.x > 0)
         {
             transform.localScale = Vector3.one;
             SetbMove(true);
+            SetbWaitingShot(false);
         }
         else
         {
@@ -142,9 +191,41 @@ public class PlayerController : MonoBehaviour
         // Shotボタンを押すと
         if (Input.GetMouseButtonDown(0))
         {
+            float x = 0, y = 0;
+            Quaternion rot = Quaternion.identity;
+            switch (dirPlayer)
+            {
+                // 右
+                case 1:
+                    x = 1;
+                    y = 0;
+                    break;
+                // 左
+                case -1:
+                    x = -1;
+                    y = 0;
+
+                    rot = Quaternion.AngleAxis(180.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                    break;
+                // 上
+                case 0:
+                    x = 0;
+                    y = 1;
+
+                    rot = Quaternion.AngleAxis(90.0f, new Vector3(0.0f, 0.0f, 1.0f));
+                    break;
+            }
+
+            // 弾の方向を設定する
+            Pre_Shot.GetComponent<ShotController>().SetMoveDir(x, y);
+
+            // 弾を生み出す
+            Instantiate(Pre_Shot, ShotPoint.position, rot);
+
             SetbShot(true);
             SetbWaitingShot(false);
             shotWaitingTime = 0;
+
         }
 
     }
@@ -155,6 +236,9 @@ public class PlayerController : MonoBehaviour
         SetbShot(false);
         SetbWaitingShot(true);
     }
+
+    //bUp
+    public void SetbUp(bool A_bUp) { bUp = A_bUp; }
 
     // bMove
     public void SetbMove(bool A_bMove) { bMove = A_bMove; }
