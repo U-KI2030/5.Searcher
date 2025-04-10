@@ -10,6 +10,13 @@ public class ShotController : MonoBehaviour
 
     public Vector2 moveDir;
 
+    public GameObject Pre_HitAnim;
+
+    // 生き残っている時間
+    private float survivalTime;
+    // 消えるまでの時間
+    public float vanishTime;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,16 +39,31 @@ public class ShotController : MonoBehaviour
 
         theRB.velocity = moveDir * moveSpeed;
 
+        survivalTime += Time.deltaTime;
+        if(survivalTime >= vanishTime)
+        {
+            // HitAnimを表示させる
+            Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+
+            // このShotを削除する
+            Destroy(gameObject);
+        }
+
     }
 
     // 何かとぶつかったとき
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // HitAnimを表示させる
+        Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+
+        // このShotを削除する
+        Destroy(gameObject);
+
         // 当たったものがPlayer以外の時
         if (other.gameObject.tag != "Player")
         {
-            // このShotを削除する
-            Destroy(gameObject);
+            
         }
     }
 

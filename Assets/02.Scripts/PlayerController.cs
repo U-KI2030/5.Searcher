@@ -71,7 +71,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // 上キーを入力しているかどうか確認
-        if (Input.GetAxisRaw("Vertical") > 0)
+        if (Input.GetAxisRaw("Vertical") > 0 && Mathf.Abs(theRB.velocity.x) == 0)
         {
             SetbUp(true);
             dirPlayer = 0;
@@ -179,6 +179,8 @@ public class PlayerController : MonoBehaviour
         anim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
         // Playerが移動しているかどうか
         anim.SetBool("bMove", bMove);
+        // Playerが上を向いているかどうか
+        anim.SetBool("bUp", bUp);
         // ShotAnim
         anim.SetBool("bShot", bShot);
         // ShotWaiting
@@ -219,8 +221,14 @@ public class PlayerController : MonoBehaviour
             // 弾の方向を設定する
             Pre_Shot.GetComponent<ShotController>().SetMoveDir(x, y);
 
+            Vector3 shotPos = ShotPoint.position;
+            if (bUp)
+            {
+                shotPos = ShotPoint_Up.position;
+            }
+
             // 弾を生み出す
-            Instantiate(Pre_Shot, ShotPoint.position, rot);
+            Instantiate(Pre_Shot, shotPos, rot);
 
             SetbShot(true);
             SetbWaitingShot(false);
