@@ -17,11 +17,18 @@ public class ShotController : MonoBehaviour
     // Á‚¦‚é‚Ü‚Å‚ÌŠÔ
     public float vanishTime;
 
+    private PlayerController thePlayer;
+
+    // ’e‚ÌˆĞ—Í
+    public float damage;
+
     // Start is called before the first frame update
     void Start()
     {
         // Rigidbody2D‚ğæ“¾‚·‚é
         theRB = this.GetComponent<Rigidbody2D>();
+
+        thePlayer = FindObjectOfType<PlayerController>();
     }
 
     // Update is called once per frame
@@ -54,16 +61,15 @@ public class ShotController : MonoBehaviour
     // ‰½‚©‚Æ‚Ô‚Â‚©‚Á‚½‚Æ‚«
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // HitAnim‚ğ•\¦‚³‚¹‚é
-        Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
-
-        // ‚±‚ÌShot‚ğíœ‚·‚é
-        Destroy(gameObject);
 
         // “–‚½‚Á‚½‚à‚Ì‚ªPlayerˆÈŠO‚Ì
-        if (other.gameObject.tag != "Player")
+        if (other.gameObject.tag == "Wall")
         {
-            
+            // HitAnim‚ğ•\¦‚³‚¹‚é
+            Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+
+            // ‚±‚ÌShot‚ğíœ‚·‚é
+            Destroy(gameObject);
         }
     }
 
