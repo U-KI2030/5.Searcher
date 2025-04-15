@@ -19,6 +19,8 @@ public class ShotController : MonoBehaviour
 
     private PlayerController thePlayer;
 
+    private GameController gameController;
+
     // 弾の威力
     public float damage;
 
@@ -29,6 +31,8 @@ public class ShotController : MonoBehaviour
         theRB = this.GetComponent<Rigidbody2D>();
 
         thePlayer = FindObjectOfType<PlayerController>();
+
+        gameController = FindObjectOfType<GameController>();
     }
 
     // Update is called once per frame
@@ -44,16 +48,22 @@ public class ShotController : MonoBehaviour
         //// 位置を変更する　
         //transform.position = pos;
 
-        theRB.velocity = moveDir * moveSpeed;
-
-        survivalTime += Time.deltaTime;
-        if(survivalTime >= vanishTime)
+        if (gameController != null)
         {
-            // HitAnimを表示させる
-            Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+            if (gameController.GetCondition())
+            {
+                theRB.velocity = moveDir * moveSpeed;
 
-            // このShotを削除する
-            Destroy(gameObject);
+                survivalTime += Time.deltaTime;
+                if (survivalTime >= vanishTime)
+                {
+                    // HitAnimを表示させる
+                    Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+
+                    // このShotを削除する
+                    Destroy(gameObject);
+                }
+            }
         }
 
     }
@@ -62,7 +72,7 @@ public class ShotController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
 
-        // 当たったものがPlayer以外の時
+        // 当たったものがWallの時
         if (other.gameObject.tag == "Wall")
         {
             // HitAnimを表示させる

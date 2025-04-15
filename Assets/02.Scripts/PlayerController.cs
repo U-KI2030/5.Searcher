@@ -29,7 +29,6 @@ public class PlayerController : MonoBehaviour
     // 0 : 上
     // 1 : 右
     private int dirPlayer;
-    // 一時的に向きを
 
 /* ----------------------------------------------------*/
     // Shot関係変数
@@ -61,13 +60,35 @@ public class PlayerController : MonoBehaviour
     public GameObject Pre_ChargeEffect;
     // ChargeEffect_UP
     public GameObject Pre_ChargeEffectUp;
+    // ChargeEffect_Jump
+    public GameObject Pre_ChargeEffectJump;
 
     // 1回だけ動作する
     private int Shot_one;
 
-    /* ----------------------------------------------------*/
+/* ----------------------------------------------------*/
     // アニメ関係変数
     public Animator anim;
+
+/* ----------------------------------------------------*/
+    // Skill関係
+    // DoubleJump
+    private bool bDoubleJump;
+    // ChargeShot
+    private bool bChargeShot;
+
+    // SkillGetUI
+    public GameObject SkillGetUI;
+
+/* ----------------------------------------------------*/
+    // GameController関係変数
+    private GameController gameController;
+
+/* ----------------------------------------------------*/
+
+/* ----------------------------------------------------*/
+    // HP関係変数
+    private float hp;
 
 /* ----------------------------------------------------*/
 
@@ -81,35 +102,41 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(shotWaitingTime >= shotWaitTime)
+        if (gameController != null)
         {
-            SetbWaitingShot(false);
+            if (gameController.GetCondition())
+            {
+                if (shotWaitingTime >= shotWaitTime)
+                {
+                    SetbWaitingShot(false);
+                }
+                else
+                {
+                    shotWaitingTime += Time.deltaTime;
+                }
+
+
+
+                // 移動・キー操作
+                Moving();
+
+                // ジャンプ
+                Jumping();
+
+                // Shot
+                Shot();
+
+
+
+
+
+
+
+
+                // アニメーション関連
+                AnimControl();
+            }
         }
-        else
-        {
-            shotWaitingTime += Time.deltaTime;
-        }
-
-        
-
-        // 移動・キー操作
-        Moving();
-
-        // ジャンプ
-        Jumping();
-
-        // Shot
-        Shot();
-
-
-
-
-
-
-
-
-        // アニメーション関連
-        AnimControl();
     }
 
     // 初期化処理
@@ -124,17 +151,35 @@ public class PlayerController : MonoBehaviour
 
         // Shot状態ではない
         SetbShot(false);
+        // Shot待ち状態ではない
         SetbWaitingShot(false);
         shotWaitingTime = 0f;
 
+        // チャージタイムを初期化
         ChargingTime = 0f;
+
+        // Effect関係を非表示
         Pre_ChargeEffect.SetActive(false);
         Pre_ChargeEffectUp.SetActive(false);
+        Pre_ChargeEffectJump.SetActive(false);
 
         Shot_one = 0;
 
         // Jump回数を0回
         JumpNum = 0;
+
+        // スキルをロック
+        bDoubleJump = false;
+        bChargeShot = false;
+
+        // SkillGetUIを非表示
+        SkillGetUI.SetActive(false);
+
+        // GameControllerを取得
+        gameController = FindObjectOfType<GameController>();
+
+        // HPを初期値(100)に変更
+        hp = 100;
     }
 
     // Moving
@@ -201,11 +246,14 @@ public class PlayerController : MonoBehaviour
             // 一回目のジャンプ
             if (bOnGround && JumpNum == 0)
             {
-                JumpNum++;
+                if (bDoubleJump)
+                {
+                    JumpNum++;
+                }
                 
                 // Jumpさせる
                 theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
-            }else if(JumpNum == 1)
+            }else if(JumpNum == 1 && bDoubleJump)
             {
                 JumpNum = 0;
 
@@ -236,13 +284,12 @@ public class PlayerController : MonoBehaviour
     // Shot
     private void Shot()
     {
-
         // Shotボタンを離すと
         if (Input.GetMouseButtonUp(0))
         {
             GameObject Shot = Pre_Shot;
 
-            if (ChargingTime >= ChargeTime)
+            if (ChargingTime >= ChargeTime && bChargeShot)
             {
                 Shot = Pre_ChargeShot;
             }
@@ -298,44 +345,57 @@ public class PlayerController : MonoBehaviour
 
             ChargingTime = 0f;
             Pre_ChargeEffect.SetActive(false);
+            Pre_ChargeEffectUp.SetActive(false);
+            Pre_ChargeEffectJump.SetActive(false);
 
         }
 
         // ショットボタンを押しっぱなしにしている時
         if (Input.GetMouseButton(0))
         {
-            
-            if (ChargingTime < ChargeTime)
+            if (bChargeShot)
             {
-                // チャージエフェクトを表示する
-                if(dirPlayer == 0)
+                if (ChargingTime < ChargeTime)
                 {
-                    Pre_ChargeEffectUp.SetActive(true);
-                    Pre_ChargeEffect.SetActive(false);
+                    // チャージエフェクトを表示する
+                    if (dirPlayer == 0)
+                    {
+                        Pre_ChargeEffect.SetActive(false);
+                        Pre_ChargeEffectUp.SetActive(true);
+                        Pre_ChargeEffectJump.SetActive(false);
+                    }
+                    else if (!bOnGround)
+                    {
+                        Pre_ChargeEffect.SetActive(false);
+                        Pre_ChargeEffectUp.SetActive(false);
+                        Pre_ChargeEffectJump.SetActive(true);
+                    }
+                    else
+                    {
+                        Pre_ChargeEffect.SetActive(true);
+                        Pre_ChargeEffectUp.SetActive(false);
+                        Pre_ChargeEffectJump.SetActive(false);
+                    }
+
+                    // チャージ中
+                    ChargingTime += Time.deltaTime;
+
+                    if (Shot_one == 0)
+                    {
+                        Shot_one = 1;
+                    }
                 }
                 else
                 {
-                    Pre_ChargeEffect.SetActive(true);
+                    // チャージ完了
+                    Pre_ChargeEffect.SetActive(false);
                     Pre_ChargeEffectUp.SetActive(false);
-                }
-                
-                // チャージ中
-                ChargingTime += Time.deltaTime;
-
-                if (Shot_one == 0)
-                {
-                    Shot_one = 1;
-
-                    SetbWaitingShot(true);
-                    SetbShot(true);
+                    Pre_ChargeEffectJump.SetActive(false);
                 }
             }
-            else
-            {
-                // チャージ完了
-                Pre_ChargeEffect.SetActive(false);
-                Pre_ChargeEffectUp.SetActive(false);
-            }
+
+            SetbWaitingShot(true);
+            SetbShot(true);
         }
     }
 
@@ -356,4 +416,31 @@ public class PlayerController : MonoBehaviour
 
     // bWaitingShotSet
     public void SetbWaitingShot(bool WaitingShot) { bWaitingShot = WaitingShot; }
+
+    // スキルを取得する
+    public bool GetSkill(int SkillNo)
+    {
+        switch (SkillNo)
+        {
+            case 1:
+                bDoubleJump = true;
+                return true;
+
+            case 2:
+                bChargeShot = true;
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    // SkillGetUIを表示させる
+    public void DisplaySkillGetUI(bool D)
+    {
+        SkillGetUI.SetActive(D);
+    }
+
+    // Hpを増減させる
+    public void AddHP(float h) { hp += h; }
 }
