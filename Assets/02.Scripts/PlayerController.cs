@@ -84,11 +84,19 @@ public class PlayerController : MonoBehaviour
     // GameController関係変数
     private GameController gameController;
 
-/* ----------------------------------------------------*/
 
 /* ----------------------------------------------------*/
     // HP関係変数
     private float hp;
+
+    // 画像関係
+    public SpriteRenderer sr;
+
+    // ダメージを受けている状態
+    private bool bDamage;
+
+    // ダメージを受けた際の時間計測用変数
+    private float DamageTime;
 
 /* ----------------------------------------------------*/
 
@@ -104,6 +112,7 @@ public class PlayerController : MonoBehaviour
     {
         if (gameController != null)
         {
+            // ゲーム状況がPlay可能で、ダメージを受けていないとき
             if (gameController.GetCondition())
             {
                 if (shotWaitingTime >= shotWaitTime)
@@ -115,8 +124,6 @@ public class PlayerController : MonoBehaviour
                     shotWaitingTime += Time.deltaTime;
                 }
 
-
-
                 // 移動・キー操作
                 Moving();
 
@@ -126,7 +133,11 @@ public class PlayerController : MonoBehaviour
                 // Shot
                 Shot();
 
-
+                // Damageを受けている時
+                if (bDamage)
+                {
+                    Damage();
+                }
 
 
 
@@ -180,6 +191,11 @@ public class PlayerController : MonoBehaviour
 
         // HPを初期値(100)に変更
         hp = 100;
+
+        // ダメージを受けていない
+        bDamage = false;
+        DamageTime = 0;
+
     }
 
     // Moving
@@ -262,23 +278,6 @@ public class PlayerController : MonoBehaviour
             }
             
         }
-    }
-
-    // Anim関連
-    private void AnimControl()
-    {
-        // Playerが地面に足がついているか
-        anim.SetBool("bOnGround", bOnGround);
-        // Playerの速度を格納
-        anim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
-        // Playerが移動しているかどうか
-        anim.SetBool("bMove", bMove);
-        // Playerが上を向いているかどうか
-        anim.SetBool("bUp", bUp);
-        // ShotAnim
-        anim.SetBool("bShot", bShot);
-        // ShotWaiting
-        anim.SetBool("bWaitingShot", bWaitingShot);
     }
 
     // Shot
@@ -399,23 +398,47 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Damageを受けた際の点滅処理
+    private void Damage()
+    {
+        float transparency = 1.0f;
+
+        DamageTime += Time.deltaTime;
+
+        transparency = GetTransparency(DamageTime);
+
+        sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, transparency);
+
+        if (DamageTime >= 1.0f)
+        {
+            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1.0f);
+            DamageTime = 0f;
+            SetbDamage(false);
+        }
+    }
+
+    // Anim関連
+    private void AnimControl()
+    {
+        // Playerが地面に足がついているか
+        anim.SetBool("bOnGround", bOnGround);
+        // Playerの速度を格納
+        anim.SetFloat("speed", Mathf.Abs(theRB.velocity.x));
+        // Playerが移動しているかどうか
+        anim.SetBool("bMove", bMove);
+        // Playerが上を向いているかどうか
+        anim.SetBool("bUp", bUp);
+        // ShotAnim
+        anim.SetBool("bShot", bShot);
+        // ShotWaiting
+        anim.SetBool("bWaitingShot", bWaitingShot);
+    }
+
     // ShotAnimが終わると呼ばれる
     public void ShotFinish()
     {
         SetbShot(false);
     }
-
-    //bUp
-    public void SetbUp(bool A_bUp) { bUp = A_bUp; }
-
-    // bMove
-    public void SetbMove(bool A_bMove) { bMove = A_bMove; }
-
-    // bShotSet
-    public void SetbShot(bool Shot) { bShot = Shot; }
-
-    // bWaitingShotSet
-    public void SetbWaitingShot(bool WaitingShot) { bWaitingShot = WaitingShot; }
 
     // スキルを取得する
     public bool GetSkill(int SkillNo)
@@ -443,4 +466,67 @@ public class PlayerController : MonoBehaviour
 
     // Hpを増減させる
     public void AddHP(float h) { hp += h; }
+
+    // Damageの時間に応じて透明度の値を返す
+    private float GetTransparency(float DamageTime)
+    {
+        if(DamageTime <= 0.1f)
+        {
+            return 1.0f;
+        }
+        else if(DamageTime <= 0.2f)
+        {
+            return 0.0f;
+        }
+        else if (DamageTime <= 0.3f)
+        {
+            return 1.0f;
+        }
+        else if (DamageTime <= 0.4f)
+        {
+            return 0.0f;
+        }
+        else if (DamageTime <= 0.5f)
+        {
+            return 1.0f;
+        }
+        else if (DamageTime <= 0.6f)
+        {
+            return 0.0f;
+        }
+        else if (DamageTime <= 0.7f)
+        {
+            return 1.0f;
+        }
+        else if (DamageTime <= 0.8f)
+        {
+            return 0.0f;
+        }
+        else if (DamageTime <= 0.9f)
+        {
+            return 1.0f;
+        }
+        else if (DamageTime <= 1.0f)
+        {
+            return 0.0f;
+        }
+        return 1.0f;
+    }
+
+    //bUp
+    public void SetbUp(bool A_bUp) { bUp = A_bUp; }
+
+    // bMove
+    public void SetbMove(bool A_bMove) { bMove = A_bMove; }
+
+    // bShotSet
+    public void SetbShot(bool Shot) { bShot = Shot; }
+
+    // bWaitingShotSet
+    public void SetbWaitingShot(bool WaitingShot) { bWaitingShot = WaitingShot; }
+
+    // bDamage
+    public void SetbDamage(bool d) { bDamage = d; }
+
+    public bool GetbDamage() { return bDamage; }
 }

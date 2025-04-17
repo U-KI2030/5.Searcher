@@ -75,16 +75,30 @@ public class ShotController : MonoBehaviour
         // “–‚½‚Á‚½‚à‚Ì‚ªWall‚Ì
         if (other.gameObject.tag == "Wall")
         {
-            // HitAnim‚ğ•\¦‚³‚¹‚é
-            Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+            HitBase();
+        }
 
-            // ‚±‚ÌShot‚ğíœ‚·‚é
-            Destroy(gameObject);
+        // “–‚½‚Á‚½‚à‚Ì‚ªEnemy‚Ì
+        if (other.gameObject.tag == "Enemy")
+        {
+            // “–‚½‚Á‚½Enemy‚ğæ“¾‚µA‚»‚ÌEnemy‚Ì‘Ì—Í‚ğŒ¸‚ç‚·
+            other.gameObject.GetComponent<EnemyController>().AddHP(-damage);
+
+            HitBase();
         }
     }
 
     public void SetMoveDir(float x,float y)
     {
         moveDir = new Vector2(x, y);
+    }
+
+    public void HitBase()
+    {
+        // HitAnim‚ğ•\¦‚³‚¹‚é
+        Instantiate(Pre_HitAnim, transform.position, Quaternion.identity);
+
+        // ‚±‚ÌShot‚ğíœ‚·‚é
+        Destroy(gameObject);
     }
 }

@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CrabController : MonoBehaviour
+public class FlyEnemyController : MonoBehaviour
 {
     private PlayerController thePlayer;
 
     // GameController
     private GameController gameController;
-
 
     /* 移動 */
     public Transform target1;
@@ -19,14 +18,6 @@ public class CrabController : MonoBehaviour
 
     // 移動速度
     public float moveSpeed;
-
-    public float WaitTime;
-    private float WaitingTime;
-
-    private bool bMove;
-
-    // アニメ関係変数
-    public Animator anim;
 
     // Start is called before the first frame update
     void Start()
@@ -42,9 +33,6 @@ public class CrabController : MonoBehaviour
         {
             // 移動・向き
             Move();
-
-            // Animation関係
-            AnimControl();
         }
     }
 
@@ -56,11 +44,6 @@ public class CrabController : MonoBehaviour
 
         target1.transform.parent = null;
         target2.transform.parent = null;
-
-        WaitingTime = 0;
-
-        SetbMove(false);
-
     }
 
     // 移動させる
@@ -69,9 +52,6 @@ public class CrabController : MonoBehaviour
         // まだtargetNowの地点にいない時
         if (transform.position != targetNow.position)
         {
-            WaitingTime = 0;
-            SetbMove(true);
-
             // targetNowの位置へ移動する
             transform.position = Vector3.MoveTowards(
                 transform.position,
@@ -80,19 +60,13 @@ public class CrabController : MonoBehaviour
         }
         else
         {
-            SetbMove(false);
-
-            WaitingTime += Time.deltaTime;
-            if (WaitingTime >= WaitTime)
+            if (targetNow == target1)
             {
-                if (targetNow == target1)
-                {
-                    targetNow = target2;
-                }
-                else
-                {
-                    targetNow = target1;
-                }
+                targetNow = target2;
+            }
+            else
+            {
+                targetNow = target1;
             }
         }
 
@@ -100,24 +74,15 @@ public class CrabController : MonoBehaviour
         // 左方向
         if (targetNow == target1)
         {
-            transform.localScale = new Vector3(7.5f, 7.5f, 1f);
+            transform.localScale = Vector3.one;
         }
         // 右方向
         if (targetNow == target2)
         {
-            transform.localScale = new Vector3(-7.5f, 7.5f, 1f);
+            transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
         }
 
     }
-
-    // Anim関連
-    private void AnimControl()
-    {
-        // 動いているかどうか
-        anim.SetBool("bMove", bMove);
-    }
-
-    public void SetbMove(bool M) { bMove = M; }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -135,4 +100,5 @@ public class CrabController : MonoBehaviour
             }
         }
     }
+
 }
