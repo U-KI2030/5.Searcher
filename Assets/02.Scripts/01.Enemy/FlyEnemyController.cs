@@ -19,6 +19,9 @@ public class FlyEnemyController : MonoBehaviour
     // 移動速度
     public float moveSpeed;
 
+    // ゲーム中のコンディション
+    private Condition condition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -29,7 +32,7 @@ public class FlyEnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameController != null && gameController.GetCondition())
+        if (gameController != null && condition.CheckCondition())
         {
             // 移動・向き
             Move();
@@ -39,6 +42,8 @@ public class FlyEnemyController : MonoBehaviour
     private void Initialize()
     {
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
 
         targetNow = target1;
 

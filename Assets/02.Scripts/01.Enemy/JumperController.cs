@@ -20,6 +20,9 @@ public class JumperController : MonoBehaviour
     // アニメ関係変数
     public Animator anim;
 
+    // ゲーム中のコンディション
+    private Condition condition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -30,7 +33,7 @@ public class JumperController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameController != null && gameController.GetCondition())
+        if (gameController != null && condition.CheckCondition())
         {
             if (bMove)
             {
@@ -69,6 +72,8 @@ public class JumperController : MonoBehaviour
         bMove = false;
 
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
 
         target1.transform.parent = null;
     }

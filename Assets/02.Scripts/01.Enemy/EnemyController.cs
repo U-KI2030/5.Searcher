@@ -18,6 +18,9 @@ public class EnemyController : MonoBehaviour
 
     private bool bDamage;
 
+    // ゲーム中のコンディション
+    private Condition condition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,7 +31,7 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameController != null && gameController.GetCondition())
+        if (gameController != null && condition.CheckCondition())
         {
             // 自身のHPをチェックする
             CheckHP();
@@ -44,6 +47,8 @@ public class EnemyController : MonoBehaviour
     private void Initialize()
     {
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
 
         DamageTime = 0f;
 

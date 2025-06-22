@@ -12,12 +12,17 @@ public class PowerUpController : MonoBehaviour
     // GameController
     private GameController gameController;
 
+    // ゲーム中のコンディション
+    private Condition condition;
+
     // Start is called before the first frame update
     void Start()
     {
         thePlayer = FindObjectOfType<PlayerController>();
 
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
     }
 
     // Update is called once per frame
@@ -36,12 +41,12 @@ public class PowerUpController : MonoBehaviour
 
             if (result)
             {
-                if(gameController != null)
+                if(gameController != null && condition != null)
                 {
                     // ゲームの時間を止める
                     gameController.GameStop();
                     // スキルアップUIを表示させている状態にする
-                    gameController.SetbDisplayUI(true);
+                    condition.SetbSkill(true);
                 }
 
                 // SkillUpUIを表示させる

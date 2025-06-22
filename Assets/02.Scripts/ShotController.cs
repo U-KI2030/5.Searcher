@@ -21,6 +21,8 @@ public class ShotController : MonoBehaviour
 
     private GameController gameController;
 
+    private Condition condition;
+
     // ’e‚ÌˆÐ—Í
     public float damage;
 
@@ -33,6 +35,8 @@ public class ShotController : MonoBehaviour
         thePlayer = FindObjectOfType<PlayerController>();
 
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
     }
 
     // Update is called once per frame
@@ -50,7 +54,7 @@ public class ShotController : MonoBehaviour
 
         if (gameController != null)
         {
-            if (gameController.GetCondition())
+            if (condition.CheckCondition())
             {
                 theRB.velocity = moveDir * moveSpeed;
 

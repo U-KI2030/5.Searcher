@@ -9,6 +9,8 @@ public class CrabController : MonoBehaviour
     // GameController
     private GameController gameController;
 
+    // ゲーム中のコンディション
+    private Condition condition;
 
     /* 移動 */
     public Transform target1;
@@ -38,7 +40,7 @@ public class CrabController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameController != null && gameController.GetCondition())
+        if (gameController != null && condition != null && condition.CheckCondition())
         {
             // 移動・向き
             Move();
@@ -51,6 +53,8 @@ public class CrabController : MonoBehaviour
     private void Initialize()
     {
         gameController = FindObjectOfType<GameController>();
+
+        condition = FindObjectOfType<Condition>();
 
         targetNow = target1;
 

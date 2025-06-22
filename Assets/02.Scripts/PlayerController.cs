@@ -6,6 +6,10 @@ public class PlayerController : MonoBehaviour
 {
     public Rigidbody2D theRB;
 
+    /* ----------------------------------------------------*/
+    // ゲームコンディション変数
+    private Condition condition;
+
 /* ----------------------------------------------------*/
     // 移動・ジャンプ、操作関係変数
     public float moveSpeed;
@@ -99,6 +103,11 @@ public class PlayerController : MonoBehaviour
     private float DamageTime;
 
 /* ----------------------------------------------------*/
+    // Explanation表示関係
+    private bool bExplanation;
+
+    // LaptopUI
+    public GameObject ExplanationUI;
 
     // Start is called before the first frame update
     void Start()
@@ -110,10 +119,10 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameController != null)
+        if (gameController != null && condition != null)
         {
-            // ゲーム状況がPlay可能で、ダメージを受けていないとき
-            if (gameController.GetCondition())
+            // Playerが操作可能の状態で、ダメージを受けていないとき
+            if (condition.CheckCondition())
             {
                 if (shotWaitingTime >= shotWaitTime)
                 {
@@ -127,8 +136,11 @@ public class PlayerController : MonoBehaviour
                 // 移動・キー操作
                 Moving();
 
-                // ジャンプ
-                Jumping();
+                // Laptop内にいない時
+                if (!bExplanation) {
+                    // ジャンプ
+                    Jumping();
+                }
 
                 // Shot
                 Shot();
@@ -139,7 +151,26 @@ public class PlayerController : MonoBehaviour
                     Damage();
                 }
 
+                // Commentを表示する
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    Comment();
+                }
 
+                // bExplanation内にいる時
+                if (bExplanation)
+                {
+                    // Spaceキーを押すと
+                    if (Input.GetButtonDown("Jump"))
+                    {
+                        // ExplanationUIが表示されている状態にする
+                        condition.SetbExplanation(true);
+                        // ExplanationUIが表示される
+                        ExplanationUI.SetActive(true);
+                        // Game時間を0にする
+                        gameController.GameStop();
+                    }
+                }
 
 
 
@@ -189,12 +220,19 @@ public class PlayerController : MonoBehaviour
         // GameControllerを取得
         gameController = FindObjectOfType<GameController>();
 
+        // conditionを取得
+        condition = FindObjectOfType<Condition>();
         // HPを初期値(100)に変更
         hp = 100;
 
         // ダメージを受けていない
         bDamage = false;
         DamageTime = 0;
+
+        // Explanationが表示できない
+        bExplanation = false;
+        // ExplanationUIを非表示
+        ExplanationUI.SetActive(false);
 
     }
 
@@ -417,6 +455,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Commentを表示させる
+    private void Comment()
+    {
+        Debug.Log(1);
+    }
+
     // Anim関連
     private void AnimControl()
     {
@@ -529,4 +573,9 @@ public class PlayerController : MonoBehaviour
     public void SetbDamage(bool d) { bDamage = d; }
 
     public bool GetbDamage() { return bDamage; }
+
+    public void SetbExplanation(bool L) { bExplanation = L; }
+
+    // bLaptop
+    public bool GetbExplanation() { return bExplanation; }
 }
