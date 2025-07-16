@@ -121,6 +121,9 @@ public class PlayerController : MonoBehaviour
     {
         if (gameController != null && condition != null)
         {
+            // Playerが地面に足がついているか
+            bOnGround = Physics2D.OverlapCircle(groundPoint.position, .2f, whatIsGround);
+
             // Playerが操作可能の状態で、ダメージを受けていないとき
             if (condition.CheckCondition())
             {
@@ -135,12 +138,6 @@ public class PlayerController : MonoBehaviour
 
                 // 移動・キー操作
                 Moving();
-
-                // Laptop内にいない時
-                if (!bExplanation) {
-                    // ジャンプ
-                    Jumping();
-                }
 
                 // Shot
                 Shot();
@@ -157,11 +154,11 @@ public class PlayerController : MonoBehaviour
                     Comment();
                 }
 
-                // bExplanation内にいる時
-                if (bExplanation)
+                // Spaceキーを押すと
+                if (Input.GetButtonDown("Jump"))
                 {
-                    // Spaceキーを押すと
-                    if (Input.GetButtonDown("Jump"))
+                    // bExplanation内にいる時
+                    if (bExplanation)
                     {
                         // ExplanationUIが表示されている状態にする
                         condition.SetbExplanation(true);
@@ -170,13 +167,18 @@ public class PlayerController : MonoBehaviour
                         // Game時間を0にする
                         gameController.GameStop();
                     }
+                    else
+                    {
+                        // ジャンプ
+                        Jumping();
+                    }
                 }
 
 
 
 
-                // アニメーション関連
-                AnimControl();
+                    // アニメーション関連
+                    AnimControl();
             }
         }
     }
@@ -288,33 +290,24 @@ public class PlayerController : MonoBehaviour
     //Jumping
     private void Jumping()
     {
-        // Playerが地面に足がついているか
-        bOnGround = Physics2D.OverlapCircle(groundPoint.position, .2f, whatIsGround);
-
-
-        // Jumpキー入力がされ、Playerが地面についている時
-        if (Input.GetButtonDown("Jump"))
+        SetbWaitingShot(false);
+        SetbShot(false);
+        // 一回目のジャンプ
+        if (bOnGround && JumpNum == 0)
         {
-            SetbWaitingShot(false);
-            SetbShot(false);
-            // 一回目のジャンプ
-            if (bOnGround && JumpNum == 0)
+            if (bDoubleJump)
             {
-                if (bDoubleJump)
-                {
-                    JumpNum++;
-                }
-                
-                // Jumpさせる
-                theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
-            }else if(JumpNum == 1 && bDoubleJump)
-            {
-                JumpNum = 0;
-
-                // Jumpさせる
-                theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
+                JumpNum++;
             }
-            
+                
+            // Jumpさせる
+            theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
+        }else if(JumpNum == 1 && bDoubleJump)
+        {
+            JumpNum = 0;
+
+            // Jumpさせる
+            theRB.velocity = new Vector2(theRB.velocity.x, jumpForce);
         }
     }
 
@@ -578,4 +571,6 @@ public class PlayerController : MonoBehaviour
 
     // bLaptop
     public bool GetbExplanation() { return bExplanation; }
+
+    public GameObject GetExplanation() { return ExplanationUI; }
 }

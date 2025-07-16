@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using System.IO;
+using System.Text;
+using Unity.VisualScripting;
 
 public class LaptopController : MonoBehaviour
 {
@@ -16,6 +20,18 @@ public class LaptopController : MonoBehaviour
 
 
  /* ----------------------------------------------------*/
+    // Textファイルを読み込む関係
+    // 行、列
+    int textNum = 0, count = 0;
+
+    // 表示させるテキスト
+    [SerializeField] TextMeshProUGUI Text;
+    // 読み込むテキスト
+    [SerializeField] TextAsset TextFile;
+
+    List<string[]> TextData = new List<string[]>();
+
+/* ----------------------------------------------------*/
 
     // Start is called before the first frame update
     void Start()
@@ -31,29 +47,71 @@ public class LaptopController : MonoBehaviour
 
         // GameControllerを取得
         gameController = FindObjectOfType<GameController>();
+
+        StringReader reader = new StringReader(TextFile.text);
+
+        while(reader.Peek() != -1)
+        {
+            string line = reader.ReadLine();
+            TextData.Add(line.Split(','));
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
         // 立札の説明文UIが表示されている時
-        if (condition.GetbExplanation())
+        if (condition.GetbExplanation() && thePlayer != null)
         {
-            // Spaceキーを押したとき
-            if (Input.GetButtonDown("Jump"))
+            if (Message != null)
             {
-                // ページ数があるとき
-
-                // ページ数がないとき
-                // ExplanationUIが非表示となっている状態にする
-                condition.SetbExplanation(false);
-                // ExplanationUIが非表示となる
-                this.gameObject.SetActive(false);
-                // Game時間を0にする
-                gameController.GameStart();
-
-                thePlayer.SetbExplanation(false);
+                Message.SetActive(false);
             }
+
+            string Times = TextData[textNum][count].ToString();
+
+            // ファイルの中身がまだあるとき
+            if(Times != "ENDTEXT")
+            {
+                // 行内がまだ終わりでないとき
+                if (Times != "END")
+                {
+                    // Spaceキーを押したとき
+                    if (Input.GetButtonDown("Jump"))
+                    {
+                        count++;
+                    }
+
+                    Text.text = Times;
+                }
+                else
+                {
+                    // Spaceキーを押したとき
+                    if (Input.GetButtonDown("Jump"))
+                    {
+                        count = 0;
+                        textNum++;
+                    }
+                }
+            }
+            // ファイルの中身がもうないとき
+            else
+            {
+                // Spaceキーを押したとき
+                if (Input.GetButtonDown("Jump"))
+                {
+                    // ExplanationUIが非表示となっている状態にする
+                    condition.SetbExplanation(false);
+                    // ExplanationUIが非表示となる
+                    thePlayer.GetExplanation().SetActive(false);
+                    thePlayer.SetbExplanation(false);
+
+                    // Game時間を0にする
+                    gameController.GameStart();
+                }
+            }
+
+            
         }
     }
 
